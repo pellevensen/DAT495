@@ -44,14 +44,12 @@ public class PRP implements Iterable<Long> {
 		this.s2 = Math.max(2 * i / 3, 1);
 	}
 
-	// A decent approximation of a psuedo-random
-	// permutation on [-2^63, 2^63).
+	// A decent approximation of a psuedo-random permutation on [0, 2^63).
 	// this.seed influences what permutation is chosen.
-	// (Of course this is a small subset since there are
-	// size! permutations but the seed has cardinality
+	// (Of course this is a small subset since there are size! permutations but the seed has cardinality
 	// [typically] much smaller than size!.)
-	// Different seeds are not guaranteed to yield different
-	// permutations although it's highly likely for larger
+	//
+	// Different seeds are not guaranteed to yield different permutations although it's highly likely for larger
 	// values of size.
 	private long mix(long v0) {
 		long v = v0;
