@@ -2,6 +2,7 @@ package testing;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * The purpose of this class is to generate pseudo random permutations without
@@ -20,7 +21,7 @@ public class PRP implements Iterable<Long> {
 
 	private final long size;
 	private final long seed;
-	private long mask;
+	private final long mask;
 	private final int s1, s2;
 
 	/**
@@ -29,12 +30,14 @@ public class PRP implements Iterable<Long> {
 	 */
 	public PRP(long size, long seed) {
 		this.size = size;
-		this.mask = 0L;
+		@SuppressWarnings("hiding")
+		long mask = 0L;
 		int i = 0;
-		while (this.mask < size) {
-			this.mask = this.mask << 1 | 1;
+		while (mask < size) {
+			mask = mask << 1 | 1;
 			i++;
 		}
+		this.mask = mask;
 		this.seed = seed;
 		this.s1 = Math.max(i / 3, 1);
 		this.s2 = Math.max(2 * i / 3, 1);
@@ -93,5 +96,23 @@ public class PRP implements Iterable<Long> {
 			}
 
 		};
+	}
+
+	@SuppressWarnings("boxing")
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.seed, this.size);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		PRP other = (PRP) obj;
+		return this.seed == other.seed && this.size == other.size;
 	}
 }
