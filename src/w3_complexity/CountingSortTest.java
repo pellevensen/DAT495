@@ -37,7 +37,6 @@ class CountingSortTest {
 		}
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testRandom() {
 		for (int len = 1; len < 10000; len *= 2) {
@@ -66,7 +65,7 @@ class CountingSortTest {
 				dummy += bs[len / 2];
 			}
 			if ((dummy & 0xFF) >= 0) {
-				System.out.printf("%20s length: %4.2e bytes, time used: %4.2f ns/byte, %9.2f µs/array\n", sorterName,
+				System.out.printf("%20s length: %4.2e bytes, time used: %4.2f ns/byte, %9.2fÂµs\n", sorterName,
 						(double) len, bytesSorted / (double) acc, bytesSorted * len / acc * 0.001);
 			}
 		}
