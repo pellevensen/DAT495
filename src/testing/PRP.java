@@ -6,12 +6,13 @@ import java.util.Objects;
 
 /**
  * The purpose of this class is to generate pseudo random permutations without
- * storing any of the indices.
+ * storing any of the indices. The memory usage is constant (and small) regardless
+ * of the permutation size.
  *
  * Useful for testing when one wants to make sure that all values occur at most
  * once.
  *
- * @author evensen
+ * @author Pelle Evensen
  */
 public class PRP implements Iterable<Long> {
 	// Some odd nothing-up-my-sleeve-numbers.
@@ -47,11 +48,11 @@ public class PRP implements Iterable<Long> {
 	// permutation on [-2^63, 2^63).
 	// this.seed influences what permutation is chosen.
 	// (Of course this is a small subset since there are
-	// size! permutations but the seed has a cardinality
+	// size! permutations but the seed has cardinality
 	// [typically] much smaller than size!.)
 	// Different seeds are not guaranteed to yield different
 	// permutations although it's highly likely for larger
-	// sizes.
+	// values of size.
 	private long mix(long v0) {
 		long v = v0;
 		long s = this.seed;
@@ -67,8 +68,10 @@ public class PRP implements Iterable<Long> {
 	}
 
 	/**
-	 * Give an iterator that will be able to iterate for {@code size} elements and
+	 * Gives an iterator that will be able to iterate for {@code size} elements and
 	 * contain each element [0, size) exactly once.
+	 *
+	 * Iterator::next runs in amortized constant time.
 	 */
 	@Override
 	public Iterator<Long> iterator() {

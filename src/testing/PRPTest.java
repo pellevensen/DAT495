@@ -9,6 +9,11 @@ import java.util.SplittableRandom;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ *
+ * @author Pelle Evensen
+ *
+ */
 class PRPTest {
 	private static void testPRP(long size, long seed) {
 		PRP p = new PRP(size, seed);

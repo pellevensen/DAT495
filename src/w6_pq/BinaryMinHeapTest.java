@@ -10,6 +10,11 @@ import org.junit.jupiter.api.Test;
 
 import testing.PRP;
 
+/**
+ *
+ * @author Pelle Evensen
+ *
+ */
 class BinaryMinHeapTest {
 	private static final int MAX_SPAN = 5000;
 	private static final int RUNS = 3;
