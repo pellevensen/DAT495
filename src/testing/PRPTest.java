@@ -2,6 +2,7 @@ package testing;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.BitSet;
@@ -11,6 +12,8 @@ import java.util.Map;
 import java.util.SplittableRandom;
 
 import org.junit.jupiter.api.Test;
+
+import testing.PRP.Builder;
 
 /**
  *
@@ -71,4 +74,13 @@ class PRPTest {
 		}
 	}
 
+	@SuppressWarnings("static-method")
+	@Test
+	void testInvalidSizes() {
+		assertThrows(IllegalArgumentException.class, () -> Builder.size(-1));
+		assertThrows(IllegalArgumentException.class, () -> Builder.size(1).runs(-1));
+		assertThrows(IllegalStateException.class, () -> Builder.size(1L << 31).runs(1L << 31).build());
+		PRP perm = Builder.size(1L << 30).runs(1L << 31).build();
+		assertTrue(perm.iterator().hasNext());
+	}
 }

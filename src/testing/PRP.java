@@ -47,9 +47,9 @@ public class PRP implements Iterable<Long> {
 	}
 
 	public static class Builder {
-		long seed;
-		long size;
-		long runs;
+		private long seed;
+		private final long size;
+		private long runs;
 
 		public static Builder size(long size) {
 			return new Builder(size);
@@ -81,6 +81,10 @@ public class PRP implements Iterable<Long> {
 		}
 
 		public PRP build() {
+			if(Long.numberOfLeadingZeros(this.size) +
+				Long.numberOfLeadingZeros(this.runs) < 65) {
+				throw new IllegalStateException("size * runs must be < 2^63");
+			}
 			return new PRP(this.size, this.seed, this.runs);
 		}
 	}
