@@ -89,7 +89,7 @@ public class PRP implements Iterable<Long> {
 		}
 	}
 
-	// A decent approximation of a psuedo-random permutation on [0, 2^63).
+	// A decent approximation of a psuedo-random permutation on [-2^63, 2^63).
 	// this.seed influences what permutation is chosen.
 	// (Of course this is a small subset since there are size! permutations but the
 	// seed has cardinality
