@@ -21,7 +21,7 @@ class NaiveTreeMapTest {
 
 			for(int pIdx = 0; pIdx < 1; pIdx++) {
 				// Insert {0, ..., span - 1} in pseudo-random order.
-				PRP insertionPermutation = new PRP(span, pIdx);
+				PRP insertionPermutation = PRP.Builder.size(span).seed(pIdx).build();
 				for (Long v : insertionPermutation) {
 					bst.put(v, v);
 				}
@@ -30,7 +30,7 @@ class NaiveTreeMapTest {
 				}
 
 				// Remove {0, ..., span - 1} in pseudo-random order.
-				PRP removalPermutation = new PRP(span, -pIdx - 1);
+				PRP removalPermutation = PRP.Builder.size(span).seed(-pIdx - 1).build();
 				Iterator<Long> pIt = removalPermutation.iterator();
 				Long prev = pIt.next();
 				while(pIt.hasNext()) {

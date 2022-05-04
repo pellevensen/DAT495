@@ -3,9 +3,6 @@ package w6_pq;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Collection;
-import java.util.LinkedList;
-
 import org.junit.jupiter.api.Test;
 
 import testing.PRP;
@@ -24,18 +21,12 @@ class BinaryMinHeapTest {
 	void test() {
 		for (int span = 1; span <= MAX_SPAN; span = Math.max(span + 1, (int) (span * 1.05))) {
 			BinaryMinHeap<Integer> heap = new BinaryMinHeap<>();
-			Collection<PRP> permutations = new LinkedList<>();
-
-			for (int i = 0; i < RUNS; i++) {
-				permutations.add(new PRP(span, i));
-			}
+			PRP permutations = PRP.Builder.size(span).runs(RUNS).build();
 
 			// Insert SPAN * RUNS integers, each integer
 			// will be on [0, SPAN) and occur exactly RUNS times.
-			for (PRP permutation : permutations) {
-				for (long i : permutation) {
-					heap.add((int) i);
-				}
+			for (long i : permutations) {
+				heap.add((int) i);
 			}
 
 			assertEquals(span * RUNS, heap.size());

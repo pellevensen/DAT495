@@ -6,8 +6,8 @@ import java.util.Objects;
 
 /**
  * The purpose of this class is to generate pseudo random permutations without
- * storing any of the indices. The memory usage is constant (and small) regardless
- * of the permutation size.
+ * storing any of the indices. The memory usage is constant (and small)
+ * regardless of the permutation size.
  *
  * Useful for testing when one wants to make sure that all values occur at most
  * once.
@@ -21,6 +21,7 @@ public class PRP implements Iterable<Long> {
 	private static final long SQRT7 = 0xA54FF53A5F1D36F1L;
 
 	private final long size;
+	private final long runs;
 	private final long seed;
 	private final long mask;
 	private final int s1, s2;
@@ -29,27 +30,69 @@ public class PRP implements Iterable<Long> {
 	 * @param size The size of the permutation.
 	 * @param seed The randomization seed.
 	 */
-	public PRP(long size, long seed) {
+	private PRP(long size, long seed, long runs) {
 		this.size = size;
 		@SuppressWarnings("hiding")
 		long mask = 0L;
 		int i = 0;
-		while (mask < size) {
+		while (mask < size * runs) {
 			mask = mask << 1 | 1;
 			i++;
 		}
 		this.mask = mask;
 		this.seed = seed;
+		this.runs = runs;
 		this.s1 = Math.max(i / 3, 1);
 		this.s2 = Math.max(2 * i / 3, 1);
 	}
 
+	public static class Builder {
+		long seed;
+		long size;
+		long runs;
+
+		public static Builder size(long size) {
+			return new Builder(size);
+		}
+
+		private Builder(long size) {
+			if(size < 0) {
+				throw new IllegalArgumentException("size must be >= 0 (was " + size + ").");
+			}
+			this.size = size;
+			this.seed = 0;
+			this.runs = 1;
+		}
+
+		/**
+		 * Each number will occur exactly {@code runs} times.
+		 */
+		public Builder runs(long runs) {
+			if(runs < 0) {
+				throw new IllegalArgumentException("Number of runs must be >= 0 (was " + runs + ").");
+			}
+			this.runs = runs;
+			return this;
+		}
+
+		public Builder seed(long seed) {
+			this.seed = seed;
+			return this;
+		}
+
+		public PRP build() {
+			return new PRP(this.size, this.seed, this.runs);
+		}
+	}
+
 	// A decent approximation of a psuedo-random permutation on [0, 2^63).
 	// this.seed influences what permutation is chosen.
-	// (Of course this is a small subset since there are size! permutations but the seed has cardinality
+	// (Of course this is a small subset since there are size! permutations but the
+	// seed has cardinality
 	// [typically] much smaller than size!.)
 	//
-	// Different seeds are not guaranteed to yield different permutations although it's highly likely for larger
+	// Different seeds are not guaranteed to yield different permutations although
+	// it's highly likely for larger
 	// values of size.
 	private long mix(long v0) {
 		long v = v0;
@@ -79,21 +122,21 @@ public class PRP implements Iterable<Long> {
 
 			@Override
 			public boolean hasNext() {
-				return this.used < PRP.this.size;
+				return this.used < PRP.this.size * PRP.this.runs;
 			}
 
 			@SuppressWarnings("boxing")
 			@Override
 			public Long next() {
-				if (this.used == PRP.this.size) {
+				if (this.used == PRP.this.size * PRP.this.runs) {
 					throw new NoSuchElementException();
 				}
 				long v = -1;
 				do {
 					v = mix(this.ctr++);
-				} while (v >= PRP.this.size);
+				} while (v >= PRP.this.size * PRP.this.runs);
 				this.used++;
-				return v;
+				return v % PRP.this.size;
 			}
 
 		};
@@ -102,7 +145,7 @@ public class PRP implements Iterable<Long> {
 	@SuppressWarnings("boxing")
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.seed, this.size);
+		return Objects.hash(this.seed, this.size, this.runs);
 	}
 
 	@Override
@@ -114,6 +157,6 @@ public class PRP implements Iterable<Long> {
 			return false;
 		}
 		PRP other = (PRP) obj;
-		return this.seed == other.seed && this.size == other.size;
+		return this.seed == other.seed && this.size == other.size && this.runs == other.runs;
 	}
 }
