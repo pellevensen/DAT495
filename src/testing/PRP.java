@@ -30,11 +30,11 @@ public class PRP implements Iterable<Long> {
 	 * @param size The size of the permutation.
 	 * @param seed The randomization seed.
 	 */
-	private PRP(long size, long seed, long runs) {
+	private PRP(final long size, final long seed, final long runs) {
 		this.size = size;
 		@SuppressWarnings("hiding")
-		long mask = 0L;
-		int i = 0;
+		var mask = 0L;
+		var i = 0;
 		while (mask < size * runs) {
 			mask = mask << 1 | 1;
 			i++;
@@ -51,12 +51,12 @@ public class PRP implements Iterable<Long> {
 		private final long size;
 		private long runs;
 
-		public static Builder size(long size) {
+		public static Builder size(final long size) {
 			return new Builder(size);
 		}
 
-		private Builder(long size) {
-			if(size < 0) {
+		private Builder(final long size) {
+			if (size < 0) {
 				throw new IllegalArgumentException("size must be >= 0 (was " + size + ").");
 			}
 			this.size = size;
@@ -67,22 +67,21 @@ public class PRP implements Iterable<Long> {
 		/**
 		 * Each number will occur exactly {@code runs} times.
 		 */
-		public Builder runs(long runs) {
-			if(runs < 0) {
+		public Builder runs(final long runs) {
+			if (runs < 0) {
 				throw new IllegalArgumentException("Number of runs must be >= 0 (was " + runs + ").");
 			}
 			this.runs = runs;
 			return this;
 		}
 
-		public Builder seed(long seed) {
+		public Builder seed(final long seed) {
 			this.seed = seed;
 			return this;
 		}
 
 		public PRP build() {
-			if(Long.numberOfLeadingZeros(this.size) +
-				Long.numberOfLeadingZeros(this.runs) < 65) {
+			if (Long.numberOfLeadingZeros(this.size) + Long.numberOfLeadingZeros(this.runs) < 65) {
 				throw new IllegalStateException("size * runs must be < 2^63");
 			}
 			return new PRP(this.size, this.seed, this.runs);
@@ -98,16 +97,16 @@ public class PRP implements Iterable<Long> {
 	// Different seeds are not guaranteed to yield different permutations although
 	// it's highly likely for larger
 	// values of size.
-	private long mix(long v0) {
-		long v = v0;
-		long s = this.seed;
-		for (int i = 0; i < 3; i++) {
-			s = s + SQRT3;
+	private long mix(final long v0) {
+		var v = v0;
+		var s = this.seed;
+		for (var i = 0; i < 3; i++) {
+			s = s + PRP.SQRT3;
 			s ^= s >>> 49 ^ s >>> 25;
 			v ^= v >>> this.s1 ^ v >>> this.s2;
 			v = v + s & this.mask;
-			s = s * SQRT5 & this.mask;
-			v = v * SQRT7 & this.mask;
+			s = s * PRP.SQRT5 & this.mask;
+			v = v * PRP.SQRT7 & this.mask;
 		}
 		return v;
 	}
@@ -135,9 +134,40 @@ public class PRP implements Iterable<Long> {
 				if (this.used == PRP.this.size * PRP.this.runs) {
 					throw new NoSuchElementException();
 				}
-				long v = -1;
+				long v;
 				do {
 					v = mix(this.ctr++);
+				} while (v >= PRP.this.size * PRP.this.runs);
+				this.used++;
+				return v % PRP.this.size;
+			}
+
+		};
+	}
+
+	/**
+	 * Gives the exact same output as the regular {@code iterator()} but in reverse
+	 * order.
+	 */
+	public Iterable<Long> inReverse() {
+		return () -> new Iterator<>() {
+			private long ctr = PRP.this.mask;
+			private long used = 0;
+
+			@Override
+			public boolean hasNext() {
+				return this.used < PRP.this.size * PRP.this.runs;
+			}
+
+			@SuppressWarnings("boxing")
+			@Override
+			public Long next() {
+				if (this.used == PRP.this.size * PRP.this.runs) {
+					throw new NoSuchElementException();
+				}
+				long v;
+				do {
+					v = mix(this.ctr--);
 				} while (v >= PRP.this.size * PRP.this.runs);
 				this.used++;
 				return v % PRP.this.size;
@@ -153,14 +183,15 @@ public class PRP implements Iterable<Long> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		}
 		if (obj == null || getClass() != obj.getClass()) {
 			return false;
 		}
-		PRP other = (PRP) obj;
+		final var other = (PRP) obj;
 		return this.seed == other.seed && this.size == other.size && this.runs == other.runs;
 	}
+
 }
